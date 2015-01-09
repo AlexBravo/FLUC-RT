@@ -10,10 +10,7 @@ import java.util.ArrayList;
 public class Movie {
     public String id;
     public String title;
-    public int year;
-    public String mpaa_rating;
-
-    @SerializedName("posters")
+    public String synopsis;
     public Posters posters;
 
     @SerializedName("abridged_cast")
@@ -26,15 +23,13 @@ public class Movie {
     }
 
     public class Ratings {
-        public String critics_rating;
         public int critics_score;
-        public String audience_rating;
         public int audience_score;
     }
 
     public class Posters {
         public String thumbnail;
-        public String profile;
+        public String detailed;
     }
 
 }

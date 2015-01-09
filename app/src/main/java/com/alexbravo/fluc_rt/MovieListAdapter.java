@@ -38,11 +38,11 @@ public class MovieListAdapter extends ArrayAdapter<Movie> {
         // Check if an existing view is being reused, otherwise inflate the view
         if (view == null) {
 
-            view = LayoutInflater.from(getContext()).inflate( R.layout.movie_list_item, parent , false );
+            view = LayoutInflater.from(getContext()).inflate( R.layout.movie_list_item, parent, false);
 
-            viewHolder = new ViewHolder( view );
+            viewHolder = new ViewHolder(view);
 
-            view.setTag( viewHolder );
+            view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder)view.getTag();
         }
