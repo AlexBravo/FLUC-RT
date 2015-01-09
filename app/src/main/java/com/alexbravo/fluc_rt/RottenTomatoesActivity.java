@@ -1,21 +1,16 @@
 package com.alexbravo.fluc_rt;
 
+import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 
 
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
@@ -36,28 +31,23 @@ public class RottenTomatoesActivity extends ActionBarActivity {
         ButterKnife.inject(this);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class MovieListFragment extends Fragment {
+    public static class MovieListFragment extends ListFragment {
 
         private RottenTomatoesRetrofitClient.RottenTomatoesService rottenTomatoesService;
         private RestAdapter restAdapter;
 
-        @InjectView(R.id.movieListView)
-        ListView movieListView;
-        
-        public MovieListFragment() {
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            
+            setUpRetroFit();
+            rottenTomatoesService.getMoviesFromServer(new RottenTomatoesMoviesResponseHandler());
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_movie_list, container, false);
-            ButterKnife.inject(this, rootView);
-            setUpRetroFit();
-            rottenTomatoesService.getMoviesFromServer(new RottenTomatoesMoviesResponseHandler());
-            return rootView;
+        public void onListItemClick(ListView l, View v, int position, long id) {
+            Log.i(TAG, "Item clicked: " + id);
         }
 
         protected void setUpRetroFit()
@@ -78,7 +68,7 @@ public class RottenTomatoesActivity extends ActionBarActivity {
                 for(Movie movie : movies.moviesFromJSONToJavaList) {
                     adapter.add(movie);
                 }
-                movieListView.setAdapter(adapter);
+                setListAdapter(adapter);
             }
 
             @Override
