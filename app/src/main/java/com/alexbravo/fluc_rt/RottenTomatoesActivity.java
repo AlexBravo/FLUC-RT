@@ -1,66 +1,91 @@
 package com.alexbravo.fluc_rt;
 
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
+import android.widget.ListView;
 
+
+import java.util.ArrayList;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import retrofit.Callback;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class RottenTomatoesActivity extends ActionBarActivity {
-
+    private static final String TAG = RottenTomatoesActivity.class.getName();
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rotten_tomatoes);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new MovieListFragment())
                     .commit();
         }
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_rotten_tomatoes, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        ButterKnife.inject(this);
     }
 
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class MovieListFragment extends Fragment {
 
-        public PlaceholderFragment() {
+        private RottenTomatoesRetrofitClient.RottenTomatoesService rottenTomatoesService;
+        private RestAdapter restAdapter;
+
+        @InjectView(R.id.movieListView)
+        ListView movieListView;
+        
+        public MovieListFragment() {
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_movie_list, container, false);
+            ButterKnife.inject(this, rootView);
+            setUpRetroFit();
+            rottenTomatoesService.getMoviesFromServer(new RottenTomatoesMoviesResponseHandler());
             return rootView;
+        }
+
+        protected void setUpRetroFit()
+        {
+            restAdapter = new RestAdapter.Builder()
+                    .setEndpoint(RottenTomatoesRetrofitClient.API_BASE_URL)
+                    .build();
+            rottenTomatoesService = restAdapter.create(RottenTomatoesRetrofitClient.RottenTomatoesService.class);
+        }
+
+        public class RottenTomatoesMoviesResponseHandler implements Callback<Movies>
+        { 
+            private ArrayList<Movie> movies = new ArrayList<Movie>();
+            private MovieListAdapter adapter = new MovieListAdapter(getActivity().getApplicationContext(), movies);
+
+            @Override
+            public void success(Movies movies, Response response) {
+                for(Movie movie : movies.moviesFromJSONToJavaList) {
+                    adapter.add(movie);
+                }
+                movieListView.setAdapter(adapter);
+            }
+
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                // TODO: Add error handling here
+                Log.e(TAG, retrofitError.getMessage());
+            }
         }
     }
 }
